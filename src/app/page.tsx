@@ -47,7 +47,9 @@ export default function HomePage() {
           <div className={styles.featureCard}>
             <h3>🥕 食材管理</h3>
             <p>冷蔵庫の食材をかんたん管理</p>
-            <button className={styles.comingSoon}>準備中</button>
+            <a href='/ingredients' className={styles.featureButton}>
+              食材管理へ
+            </a>
           </div>
 
           <div className={styles.featureCard}>
