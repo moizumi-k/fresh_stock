@@ -1,0 +1,173 @@
+// サインアップ画面のスタイル
+
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8faf8;
+  padding: 1rem;
+}
+
+.signupCard {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+}
+
+.successCard {
+  background: white;
+  border-radius: 12px;
+  padding: 3rem 2rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid #d1fae5;
+  text-align: center;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+
+  .logo {
+    font-size: 2rem;
+    margin: 0 0 0.5rem 0;
+    color: #16a34a;
+    font-weight: 600;
+  }
+
+  .subtitle {
+    color: #6b7280;
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.4;
+  }
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.error {
+  background-color: #fef2f2;
+  color: #dc2626;
+  padding: 0.75rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  border: 1px solid #fecaca;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  font-weight: 500;
+  color: #374151;
+  font-size: 0.875rem;
+}
+
+.input,
+.select {
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background-color: white !important; // 強制的に白背景
+  color: #1f2937 !important; // 強制的にダークグレー文字色
+
+  &:focus {
+    outline: none;
+    border-color: #16a34a;
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+    background-color: white !important;
+  }
+
+  &:disabled {
+    background-color: #f3f4f6 !important;
+    color: #9ca3af !important;
+    cursor: not-allowed;
+  }
+
+  &::placeholder {
+    color: #9ca3af;
+  }
+
+  // ブラウザのオートフィルスタイルをリセット
+  &:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px white inset !important;
+    -webkit-text-fill-color: #1f2937 !important;
+  }
+}
+
+.select {
+  cursor: pointer;
+}
+
+.fieldError {
+  color: #dc2626;
+  font-size: 0.75rem;
+}
+
+.submitButton {
+  background-color: #16a34a;
+  color: white;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover:not(:disabled) {
+    background-color: #15803d;
+  }
+
+  &:disabled {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+  }
+}
+
+.footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+
+  .link {
+    color: #16a34a;
+    text-decoration: none;
+    font-weight: 500;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// レスポンシブ対応
+@media (max-width: 480px) {
+  .container {
+    padding: 0.5rem;
+  }
+
+  .signupCard {
+    padding: 1.5rem;
+  }
+
+  .header .logo {
+    font-size: 1.75rem;
+  }
+}

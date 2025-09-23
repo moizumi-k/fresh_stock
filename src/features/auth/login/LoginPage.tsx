@@ -2,12 +2,12 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { supabase } from '../../../lib/supabase';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
 import styles from './login.module.scss';
-import { supabase } from '@/app/lib/supabase';
 
 // フォームバリデーションスキーマ
 const loginSchema = z.object({
@@ -42,8 +42,8 @@ export default function LoginPage() {
 
       if (error) throw error;
 
-      // ログイン成功後、ホーム画面へリダイレクト
-      router.push('/');
+      // AuthContextが自動でリダイレクトするので、手動リダイレクト削除
+      console.log('Login successful:', authData.user?.email);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'ログインに失敗しました');
     } finally {

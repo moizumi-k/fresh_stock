@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🥬 FreshStock
 
-## Getting Started
+家族向け食材管理＆AI レシピ提案アプリ
 
-First, run the development server:
+## ✨ 主な機能
 
-```bash
+- 🔐 **ユーザー認証** - メール・パスワード認証
+- 👨‍👩‍👧‍👦 **家族グループ機能** - 家族みんなで食材データを共有
+- 🥕 **食材管理** - 在庫の「ある/ない」をシンプル管理
+- 🤖 **AI レシピ提案** - Google Gemini AI が食材に合わせてレシピを提案
+- 📱 **レスポンシブ対応** - スマートフォンファースト設計
+
+## 🛠️ 技術スタック
+
+- **Frontend**: Next.js 15 + TypeScript + SCSS
+- **Backend**: Supabase (PostgreSQL + Auth)
+- **AI**: Google Gemini API
+- **Deploy**: Vercel
+- **UI**: Lucide React
+- **Form**: React Hook Form + Zod
+
+## 🚀 セットアップ
+
+### 1. リポジトリのクローン
+
+\`\`\`bash
+git clone https://github.com/your-username/fresh-stock.git
+cd fresh-stock
+\`\`\`
+
+### 2. 依存関係のインストール
+
+\`\`\`bash
+npm install
+\`\`\`
+
+### 3. 環境変数の設定
+
+\`\`\`bash
+cp .env.example .env.local
+\`\`\`
+
+`.env.local`ファイルを編集して、以下の値を設定してください：
+
+- Supabase プロジェクト URL・API キー
+- Google Gemini API キー
+
+### 4. Supabase データベース設定
+
+Supabase ダッシュボードの SQL Editor で、プロジェクト内の`database.sql`を実行してください。
+
+### 5. 開発サーバー起動
+
+\`\`\`bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+\`\`\`
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+http://localhost:3000 でアプリが起動します。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📁 プロジェクト構造
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+\`\`\`
+src/
+├── app/ # Next.js App Router
+├── features/ # 機能別コンポーネント
+│ └── auth/ # 認証関連
+├── lib/ # 共通ライブラリ・設定
+└── components/ # 再利用可能コンポーネント
+\`\`\`
 
-## Learn More
+## 📋 開発状況
 
-To learn more about Next.js, take a look at the following resources:
+- [x] プロジェクト初期設定
+- [x] 認証機能（ログイン・サインアップ）
+- [x] 家族グループ機能
+- [ ] 食材管理機能
+- [ ] AI レシピ提案機能
+- [ ] レシピ詳細画面
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🔧 開発コマンド
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+\`\`\`bash
+npm run dev # 開発サーバー起動
+npm run build # プロダクションビルド
+npm run start # プロダクションサーバー起動
+npm run lint # ESLint 実行
+\`\`\`
 
-## Deploy on Vercel
+## 📄 ライセンス
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT License

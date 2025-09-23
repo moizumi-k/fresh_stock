@@ -1,19 +1,22 @@
 import type { Metadata } from 'next';
+import { AuthProvider } from '../lib/AuthContext';
 import './globals.scss';
 
 export const metadata: Metadata = {
-  title: 'fresh-stock',
-  description: 'フレッシュストック',
+  title: 'FreshStock - 家族の食材管理アプリ',
+  description: 'AIが提案する食材管理＆レシピアプリ',
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang='ja'>
-      <body>{children}</body>
+      <body>
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }
