@@ -1,4 +1,4 @@
-// サインアップ画面のスタイル
+// サインアップ画面のスタイル（リファクタリング後）
 
 .container {
   min-height: 100vh;
@@ -64,6 +64,7 @@
   border: 1px solid #fecaca;
 }
 
+// selectフィールド用（Inputコンポーネントでカバーできないもの）
 .inputGroup {
   display: flex;
   flex-direction: column;
@@ -76,68 +77,25 @@
   font-size: 0.875rem;
 }
 
-.input,
 .select {
+  width: 100%;
   padding: 0.75rem;
   border: 1px solid #d1d5db;
   border-radius: 6px;
   font-size: 1rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  background-color: white !important; // 強制的に白背景
-  color: #1f2937 !important; // 強制的にダークグレー文字色
+  background-color: white;
+  cursor: pointer;
 
   &:focus {
     outline: none;
     border-color: #16a34a;
     box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
-    background-color: white !important;
   }
-
-  &:disabled {
-    background-color: #f3f4f6 !important;
-    color: #9ca3af !important;
-    cursor: not-allowed;
-  }
-
-  &::placeholder {
-    color: #9ca3af;
-  }
-
-  // ブラウザのオートフィルスタイルをリセット
-  &:-webkit-autofill {
-    -webkit-box-shadow: 0 0 0 1000px white inset !important;
-    -webkit-text-fill-color: #1f2937 !important;
-  }
-}
-
-.select {
-  cursor: pointer;
 }
 
 .fieldError {
-  color: #dc2626;
+  color: #ef4444;
   font-size: 0.75rem;
-}
-
-.submitButton {
-  background-color: #16a34a;
-  color: white;
-  padding: 0.75rem;
-  border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-
-  &:hover:not(:disabled) {
-    background-color: #15803d;
-  }
-
-  &:disabled {
-    background-color: #9ca3af;
-    cursor: not-allowed;
-  }
 }
 
 .footer {

@@ -1,0 +1,221 @@
+// ヘッダーコンポーネントのスタイル
+
+.header {
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// ロゴ
+.logo {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #16a34a;
+  cursor: pointer;
+  transition: color 0.2s;
+  user-select: none;
+  white-space: nowrap; // 改行を防ぐ
+  flex-shrink: 0; // 縮小を防ぐ
+
+  &:hover {
+    color: #15803d;
+  }
+}
+
+// ナビゲーション
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  justify-content: center;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  position: relative;
+  white-space: nowrap;
+
+  &:hover:not(.disabled) {
+    background-color: #e5e7eb; // より濃いグレーで明確に
+    color: #1f2937;
+  }
+
+  &.active {
+    background-color: #dcfce7;
+    color: #16a34a;
+  }
+
+  &.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.navLabel {
+  font-size: 0.875rem;
+}
+
+.comingSoon {
+  position: absolute;
+  top: -8px;
+  right: -4px;
+  background: #ef4444;
+  color: white;
+  font-size: 0.625rem;
+  padding: 0.125rem 0.375rem;
+  border-radius: 999px;
+  line-height: 1;
+}
+
+// ユーザーセクション
+.userSection {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.userEmail {
+  font-size: 0.875rem;
+  color: #1f2937;
+  font-weight: 500;
+}
+
+.logoutText {
+  font-size: 0.875rem;
+}
+
+// レスポンシブ対応（段階的に調整）
+
+// 大きなタブレット（900px以下）
+@media (max-width: 900px) {
+  .container {
+    padding: 0 1rem;
+  }
+
+  .nav {
+    gap: 0.25rem;
+  }
+
+  .navItem {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .navLabel {
+    font-size: 0.8rem;
+  }
+
+  .userSection {
+    gap: 0.75rem;
+  }
+}
+
+// タブレット（768px以下）
+@media (max-width: 768px) {
+  .container {
+    height: 60px;
+  }
+
+  .logo {
+    font-size: 1.5rem;
+  }
+
+  .navItem {
+    padding: 0.5rem;
+    flex-direction: column;
+    gap: 0.25rem;
+
+    .navLabel {
+      font-size: 0.7rem;
+      line-height: 1;
+    }
+  }
+
+  .userSection {
+    gap: 0.5rem;
+  }
+
+  .userInfo {
+    display: none;
+  }
+
+  .logoutText {
+    display: none;
+  }
+}
+
+// 小さなスマホ（480px以下）
+@media (max-width: 480px) {
+  .container {
+    padding: 0 0.75rem;
+    height: 55px;
+  }
+
+  .logo {
+    font-size: 1.2rem; // さらに小さく
+    /* 絵文字と文字の間隔を調整 */
+    letter-spacing: -0.02em;
+  }
+
+  .nav {
+    gap: 0;
+  }
+
+  .navItem {
+    padding: 0.4rem;
+    min-width: 40px;
+    justify-content: center;
+
+    .navLabel {
+      display: none; // 非常に小さい画面ではラベルを完全に隠す
+    }
+  }
+}
+
+// 非常に小さなスマホ（350px以下）
+@media (max-width: 350px) {
+  .container {
+    padding: 0 0.5rem;
+  }
+
+  .logo {
+    font-size: 1rem;
+  }
+
+  .navItem {
+    padding: 0.3rem;
+    min-width: 36px;
+  }
+}

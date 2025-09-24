@@ -1,37 +1,30 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabase';
+import { useState } from 'react';
 import { useAuth } from '../../lib/AuthContext';
 import { Search, Plus, Trash2 } from 'lucide-react';
+import Button from '../../components/common/Button';
+import Input from '../../components/common/Input';
+import Loading from '../../components/common/Loading';
+import { useIngredients } from '../../hooks/useIngredients';
 import styles from './ingredients.module.scss';
-
-interface IngredientMaster {
-  id: string;
-  name: string;
-  category: string;
-}
-
-interface UserIngredient {
-  id: string;
-  name: string;
-  category: string;
-  has_stock: boolean;
-  added_date: string;
-}
 
 export default function IngredientsPage() {
   const { user } = useAuth();
-  const [userIngredients, setUserIngredients] = useState<UserIngredient[]>([]);
-  const [masterIngredients, setMasterIngredients] = useState<
-    IngredientMaster[]
-  >([]);
+  const {
+    userIngredients,
+    masterIngredients,
+    isLoading,
+    addIngredient,
+    toggleStock,
+    removeIngredient,
+  } = useIngredients();
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [isLoading, setIsLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
 
-  // カテゴリ一覧を取得
+  // カテゴリ一覧
   const categories = [
     'all',
     '野菜',
@@ -43,111 +36,12 @@ export default function IngredientsPage() {
     'その他',
   ];
 
-  useEffect(() => {
-    if (user) {
-      fetchUserIngredients();
-      fetchMasterIngredients();
-    }
-  }, [user]);
-
-  // ユーザーの食材データ取得
-  const fetchUserIngredients = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('ingredients')
-        .select('*')
-        .order('category', { ascending: true })
-        .order('name', { ascending: true });
-
-      if (error) throw error;
-      setUserIngredients(data || []);
-    } catch (error) {
-      console.error('Failed to fetch user ingredients:', error);
-    }
-  };
-
-  // マスター食材データ取得
-  const fetchMasterIngredients = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('ingredient_master')
-        .select('*')
-        .order('category', { ascending: true })
-        .order('name', { ascending: true });
-
-      if (error) throw error;
-      setMasterIngredients(data || []);
-      setIsLoading(false);
-    } catch (error) {
-      console.error('Failed to fetch master ingredients:', error);
-      setIsLoading(false);
-    }
-  };
-
-  // 食材の在庫状態を切り替え
-  const toggleIngredientStock = async (
-    ingredientId: string,
-    currentStock: boolean
-  ) => {
-    try {
-      const { error } = await supabase
-        .from('ingredients')
-        .update({
-          has_stock: !currentStock,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', ingredientId);
-
-      if (error) throw error;
-      fetchUserIngredients();
-    } catch (error) {
-      console.error('Failed to toggle ingredient stock:', error);
-    }
-  };
-
   // 新しい食材を追加
-  const addIngredientFromMaster = async (
-    masterIngredient: IngredientMaster
-  ) => {
-    try {
-      // 既に追加済みかチェック
-      const exists = userIngredients.some(
-        (ingredient) => ingredient.name === masterIngredient.name
-      );
-
-      if (exists) {
-        alert('この食材は既に追加されています');
-        return;
-      }
-
-      const { error } = await supabase.from('ingredients').insert({
-        name: masterIngredient.name,
-        category: masterIngredient.category,
-        has_stock: true, // デフォルトで「ある」状態
-      });
-
-      if (error) throw error;
-      fetchUserIngredients();
+  const handleAddIngredient = async (masterIngredient: any) => {
+    const success = await addIngredient(masterIngredient);
+    if (success) {
       setShowAddForm(false);
-    } catch (error) {
-      console.error('Failed to add ingredient:', error);
-    }
-  };
-
-  // 食材を削除
-  const removeIngredient = async (ingredientId: string) => {
-    if (confirm('この食材を削除しますか？')) {
-      try {
-        const { error } = await supabase
-          .from('ingredients')
-          .delete()
-          .eq('id', ingredientId);
-
-        if (error) throw error;
-        fetchUserIngredients();
-      } catch (error) {
-        console.error('Failed to remove ingredient:', error);
-      }
+      setSearchTerm('');
     }
   };
 
@@ -172,46 +66,39 @@ export default function IngredientsPage() {
     return matchesSearch && notAdded;
   });
 
+  if (!user) {
+    return <Loading text='認証確認中...' fullScreen />;
+  }
+
   if (isLoading) {
-    return (
-      <div className={styles.loading}>
-        <div className={styles.spinner}>🥬</div>
-        <p>食材データを読み込み中...</p>
-      </div>
-    );
+    return <Loading text='食材データを読み込み中...' />;
   }
 
   return (
     <div className={styles.container}>
       <header className={styles.header}>
         <h1>🥬 食材管理</h1>
-        <button
-          onClick={() => setShowAddForm(!showAddForm)}
-          className={styles.addButton}
-        >
+        <Button variant='primary' onClick={() => setShowAddForm(!showAddForm)}>
           <Plus size={20} />
           食材追加
-        </button>
+        </Button>
       </header>
 
       {/* 食材追加フォーム */}
       {showAddForm && (
         <div className={styles.addForm}>
-          <div className={styles.searchBox}>
-            <Search size={20} />
-            <input
-              type='text'
-              placeholder='食材名で検索...'
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+          <Input
+            placeholder='食材名で検索...'
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            icon={<Search size={20} />}
+          />
 
           <div className={styles.masterIngredientsList}>
             {filteredMasterIngredients.slice(0, 10).map((ingredient) => (
               <button
                 key={ingredient.id}
-                onClick={() => addIngredientFromMaster(ingredient)}
+                onClick={() => handleAddIngredient(ingredient)}
                 className={styles.masterIngredientItem}
               >
                 <span className={styles.category}>{ingredient.category}</span>
@@ -266,14 +153,15 @@ export default function IngredientsPage() {
 
                 <div className={styles.cardBody}>
                   <h3 className={styles.name}>{ingredient.name}</h3>
-                  <button
+                  <Button
+                    variant={ingredient.has_stock ? 'primary' : 'secondary'}
                     onClick={() =>
-                      toggleIngredientStock(ingredient.id, ingredient.has_stock)
+                      toggleStock(ingredient.id, ingredient.has_stock)
                     }
-                    className={styles.stockToggle}
+                    size='sm'
                   >
                     {ingredient.has_stock ? '✅ あり' : '❌ なし'}
-                  </button>
+                  </Button>
                 </div>
               </div>
             ))}

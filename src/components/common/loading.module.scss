@@ -1,0 +1,57 @@
+// 共通ローディングコンポーネント
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem;
+
+  &.fullScreen {
+    min-height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.9);
+    z-index: 9999;
+  }
+}
+
+.spinner {
+  animation: bounce 1s infinite;
+
+  &.sm {
+    font-size: 1.5rem;
+  }
+
+  &.md {
+    font-size: 2.5rem;
+  }
+
+  &.lg {
+    font-size: 4rem;
+  }
+}
+
+.text {
+  color: #6b7280;
+  font-size: 1rem;
+  margin: 0;
+
+  .fullScreen & {
+    font-size: 1.125rem;
+  }
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}

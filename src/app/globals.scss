@@ -28,14 +28,43 @@ a {
   text-decoration: none;
 }
 
+// ボタンのデフォルトスタイルをリセット
 button {
   font-family: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+
+  // フォーカス時のアウトラインをカスタマイズ
+  &:focus-visible {
+    outline: 2px solid #16a34a;
+    outline-offset: 2px;
+  }
 }
 
+// 入力要素のデフォルトスタイル改善
 input,
 select,
 textarea {
   font-family: inherit;
+
+  // WebKit系ブラウザでの外観をリセット
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+
+  &:focus-visible {
+    outline: none; // カスタムフォーカススタイルを使用
+  }
+}
+
+// selectボックスの矢印アイコンを復活
+select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.75rem center;
+  background-repeat: no-repeat;
+  background-size: 1.25rem 1.25rem;
+  padding-right: 2.5rem;
 }
 
 // ダークモード対応（将来的に）

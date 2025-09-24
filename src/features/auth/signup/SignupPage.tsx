@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '../../../lib/supabase';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
+import Button from '../../../components/common/Button';
+import Input from '../../../components/common/Input';
+import { useAuthForm } from '../../../hooks/useAuthForm';
 import styles from './signup.module.scss';
 
 // フォームバリデーションスキーマ
@@ -28,9 +29,7 @@ const signupSchema = z
 type SignupForm = z.infer<typeof signupSchema>;
 
 export default function SignupPage() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
+  const { isLoading, error, success, signup } = useAuthForm();
   const router = useRouter();
 
   const {
@@ -40,62 +39,17 @@ export default function SignupPage() {
   } = useForm<SignupForm>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
-      memberCount: 2, // デフォルト値
+      memberCount: 2,
     },
   });
 
-  const generateGroupCode = (): string => {
-    return Math.random().toString(36).substring(2, 8).toUpperCase();
-  };
-
   const onSubmit = async (data: SignupForm) => {
-    setIsLoading(true);
-    setError('');
+    await signup(data.email, data.password, data.memberCount);
 
-    try {
-      // 1. ユーザー登録
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-      });
-
-      if (authError) throw authError;
-
-      if (authData.user) {
-        // 2. DB関数を呼び出してプロファイルと家族グループを一括作成
-        const { data: result, error: functionError } = await supabase.rpc(
-          'create_user_with_family_group',
-          {
-            user_id: authData.user.id,
-            user_email: data.email,
-            member_count: data.memberCount,
-          }
-        );
-
-        if (functionError) {
-          console.error('Function error:', functionError);
-          throw new Error('アカウント設定に失敗しました');
-        }
-
-        if (!result.success) {
-          throw new Error(result.error || 'アカウント設定に失敗しました');
-        }
-
-        console.log('Account created successfully:', result);
-        setSuccess(true);
-
-        // 3秒後にログイン画面へリダイレクト
-        setTimeout(() => {
-          router.push('/auth/login');
-        }, 3000);
-      }
-    } catch (err) {
-      console.error('Signup error:', err);
-      setError(
-        err instanceof Error ? err.message : 'アカウント作成に失敗しました'
-      );
-    } finally {
-      setIsLoading(false);
+    if (success) {
+      setTimeout(() => {
+        router.push('/auth/login');
+      }, 3000);
     }
   };
 
@@ -129,57 +83,29 @@ export default function SignupPage() {
         <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
           {error && <div className={styles.error}>{error}</div>}
 
-          <div className={styles.inputGroup}>
-            <label htmlFor='email' className={styles.label}>
-              メールアドレス
-            </label>
-            <input
-              id='email'
-              type='email'
-              className={styles.input}
-              placeholder='example@email.com'
-              {...register('email')}
-            />
-            {errors.email && (
-              <span className={styles.fieldError}>{errors.email.message}</span>
-            )}
-          </div>
+          <Input
+            label='メールアドレス'
+            type='email'
+            placeholder='example@email.com'
+            error={errors.email?.message}
+            {...register('email')}
+          />
 
-          <div className={styles.inputGroup}>
-            <label htmlFor='password' className={styles.label}>
-              パスワード
-            </label>
-            <input
-              id='password'
-              type='password'
-              className={styles.input}
-              placeholder='6文字以上で入力'
-              {...register('password')}
-            />
-            {errors.password && (
-              <span className={styles.fieldError}>
-                {errors.password.message}
-              </span>
-            )}
-          </div>
+          <Input
+            label='パスワード'
+            type='password'
+            placeholder='6文字以上で入力'
+            error={errors.password?.message}
+            {...register('password')}
+          />
 
-          <div className={styles.inputGroup}>
-            <label htmlFor='confirmPassword' className={styles.label}>
-              パスワード（確認）
-            </label>
-            <input
-              id='confirmPassword'
-              type='password'
-              className={styles.input}
-              placeholder='パスワードを再入力'
-              {...register('confirmPassword')}
-            />
-            {errors.confirmPassword && (
-              <span className={styles.fieldError}>
-                {errors.confirmPassword.message}
-              </span>
-            )}
-          </div>
+          <Input
+            label='パスワード（確認）'
+            type='password'
+            placeholder='パスワードを再入力'
+            error={errors.confirmPassword?.message}
+            {...register('confirmPassword')}
+          />
 
           <div className={styles.inputGroup}>
             <label htmlFor='memberCount' className={styles.label}>
@@ -203,13 +129,14 @@ export default function SignupPage() {
             )}
           </div>
 
-          <button
+          <Button
             type='submit'
-            disabled={isLoading}
-            className={styles.submitButton}
+            variant='primary'
+            size='lg'
+            isLoading={isLoading}
           >
-            {isLoading ? 'アカウント作成中...' : 'アカウントを作成'}
-          </button>
+            アカウントを作成
+          </Button>
         </form>
 
         {/* ログインへのリンク */}

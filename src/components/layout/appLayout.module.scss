@@ -1,0 +1,19 @@
+// アプリレイアウトのスタイル
+
+.appLayout {
+  min-height: 100vh;
+  background-color: #f8faf8;
+}
+
+.main {
+  min-height: calc(100vh - 70px); // ヘッダーの高さを考慮
+  padding: 0; // 各ページでpaddingを管理
+
+  @media (max-width: 768px) {
+    min-height: calc(100vh - 60px); // モバイルヘッダーサイズ
+  }
+
+  @media (max-width: 480px) {
+    min-height: calc(100vh - 55px); // 小さい画面ヘッダーサイズ
+  }
+}

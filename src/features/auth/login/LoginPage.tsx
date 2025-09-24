@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '../../../lib/supabase';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
+import Button from '../../../components/common/Button';
+import Input from '../../../components/common/Input';
+import { useAuthForm } from '../../../hooks/useAuthForm';
 import styles from './login.module.scss';
 
 // フォームバリデーションスキーマ
@@ -18,8 +19,7 @@ const loginSchema = z.object({
 type LoginForm = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const { isLoading, error, login } = useAuthForm();
   const router = useRouter();
 
   const {
@@ -31,24 +31,7 @@ export default function LoginPage() {
   });
 
   const onSubmit = async (data: LoginForm) => {
-    setIsLoading(true);
-    setError('');
-
-    try {
-      const { data: authData, error } = await supabase.auth.signInWithPassword({
-        email: data.email,
-        password: data.password,
-      });
-
-      if (error) throw error;
-
-      // AuthContextが自動でリダイレクトするので、手動リダイレクト削除
-      console.log('Login successful:', authData.user?.email);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'ログインに失敗しました');
-    } finally {
-      setIsLoading(false);
-    }
+    await login(data.email, data.password);
   };
 
   return (
@@ -64,47 +47,30 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
           {error && <div className={styles.error}>{error}</div>}
 
-          <div className={styles.inputGroup}>
-            <label htmlFor='email' className={styles.label}>
-              メールアドレス
-            </label>
-            <input
-              id='email'
-              type='email'
-              className={styles.input}
-              placeholder='example@email.com'
-              {...register('email')}
-            />
-            {errors.email && (
-              <span className={styles.fieldError}>{errors.email.message}</span>
-            )}
-          </div>
+          <Input
+            label='メールアドレス'
+            type='email'
+            placeholder='example@email.com'
+            error={errors.email?.message}
+            {...register('email')}
+          />
 
-          <div className={styles.inputGroup}>
-            <label htmlFor='password' className={styles.label}>
-              パスワード
-            </label>
-            <input
-              id='password'
-              type='password'
-              className={styles.input}
-              placeholder='パスワードを入力'
-              {...register('password')}
-            />
-            {errors.password && (
-              <span className={styles.fieldError}>
-                {errors.password.message}
-              </span>
-            )}
-          </div>
+          <Input
+            label='パスワード'
+            type='password'
+            placeholder='パスワードを入力'
+            error={errors.password?.message}
+            {...register('password')}
+          />
 
-          <button
+          <Button
             type='submit'
-            disabled={isLoading}
-            className={styles.submitButton}
+            variant='primary'
+            size='lg'
+            isLoading={isLoading}
           >
-            {isLoading ? 'ログイン中...' : 'ログイン'}
-          </button>
+            ログイン
+          </Button>
         </form>
 
         {/* サインアップへのリンク */}
