@@ -1,0 +1,56 @@
+// FreshStock CSS変数定義（シンプル版）
+
+:root {
+  // ===============================
+  // カラーパレット（実際に使用している色のみ）
+  // ===============================
+
+  // メインカラー
+  --color-primary: #16a34a; // メイングリーン
+  --color-primary-hover: #15803d; // ホバー時
+  --color-primary-light: #dcfce7; // アクティブ背景
+
+  // グレースケール（実際に使用）
+  --color-white: #ffffff;
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-800: #1f2937;
+
+  // ステートカラー
+  --color-error: #ef4444;
+  --color-error-light: #fef2f2;
+
+  // 背景色
+  --color-background: #f8faf8;
+  --color-background-hover: #e5e7eb;
+
+  // ===============================
+  // レスポンシブブレークポイント
+  // ===============================
+  --breakpoint-tablet: 768px;
+  --breakpoint-mobile: 480px;
+  --breakpoint-small: 350px;
+}
+
+// レスポンシブミックスイン
+@mixin tablet {
+  @media (max-width: 768px) {
+    @content;
+  }
+}
+
+@mixin mobile {
+  @media (max-width: 480px) {
+    @content;
+  }
+}
+
+@mixin small {
+  @media (max-width: 350px) {
+    @content;
+  }
+}

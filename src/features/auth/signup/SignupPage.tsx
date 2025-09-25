@@ -7,7 +7,9 @@ import { z } from 'zod';
 import Link from 'next/link';
 import Button from '../../../components/common/Button';
 import Input from '../../../components/common/Input';
+import Select from '../../../components/common/Select';
 import { useAuthForm } from '../../../hooks/useAuthForm';
+import { ROUTES } from '../../../constants/routes';
 import styles from './signup.module.scss';
 
 // フォームバリデーションスキーマ
@@ -48,7 +50,7 @@ export default function SignupPage() {
 
     if (success) {
       setTimeout(() => {
-        router.push('/auth/login');
+        router.push(ROUTES.LOGIN);
       }, 3000);
     }
   };
@@ -107,27 +109,18 @@ export default function SignupPage() {
             {...register('confirmPassword')}
           />
 
-          <div className={styles.inputGroup}>
-            <label htmlFor='memberCount' className={styles.label}>
-              家族人数
-            </label>
-            <select
-              id='memberCount'
-              className={styles.select}
-              {...register('memberCount', { valueAsNumber: true })}
-            >
-              <option value={1}>1人</option>
-              <option value={2}>2人</option>
-              <option value={3}>3人</option>
-              <option value={4}>4人</option>
-              <option value={5}>5人</option>
-            </select>
-            {errors.memberCount && (
-              <span className={styles.fieldError}>
-                {errors.memberCount.message}
-              </span>
-            )}
-          </div>
+          <Select
+            label='家族人数'
+            options={[
+              { value: 1, label: '1人' },
+              { value: 2, label: '2人' },
+              { value: 3, label: '3人' },
+              { value: 4, label: '4人' },
+              { value: 5, label: '5人' },
+            ]}
+            error={errors.memberCount?.message}
+            {...register('memberCount', { valueAsNumber: true })}
+          />
 
           <Button
             type='submit'
@@ -143,7 +136,7 @@ export default function SignupPage() {
         <div className={styles.footer}>
           <p>
             すでにアカウントをお持ちの方は{' '}
-            <Link href='/auth/login' className={styles.link}>
+            <Link href={ROUTES.LOGIN} className={styles.link}>
               ログイン
             </Link>
           </p>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { TABLES } from '../constants/api';
 
 export interface IngredientMaster {
   id: string;
@@ -42,12 +43,15 @@ export function useIngredients(): UseIngredientsReturn {
   const fetchUserIngredients = async () => {
     try {
       const { data, error } = await supabase
-        .from('ingredients')
+        .from(TABLES.INGREDIENTS)
         .select('*')
         .order('category', { ascending: true })
         .order('name', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Ingredients fetch error:', error);
+        throw error;
+      }
       setUserIngredients(data || []);
     } catch (error) {
       console.error('Failed to fetch user ingredients:', error);
@@ -58,12 +62,17 @@ export function useIngredients(): UseIngredientsReturn {
   const fetchMasterIngredients = async () => {
     try {
       const { data, error } = await supabase
-        .from('ingredient_master')
+        .from(TABLES.INGREDIENT_MASTER)
         .select('*')
         .order('category', { ascending: true })
         .order('name', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Master ingredients fetch error:', error);
+        throw error;
+      }
+      console.log(data);
+
       setMasterIngredients(data || []);
       setIsLoading(false);
     } catch (error) {
@@ -87,18 +96,36 @@ export function useIngredients(): UseIngredientsReturn {
         return false;
       }
 
-      const { error } = await supabase.from('ingredients').insert({
+      // 現在のユーザー情報を取得してfamily_group_idを取得
+      const { data: profile, error: profileError } = await supabase
+        .from(TABLES.PROFILES)
+        .select('family_group_id')
+        .eq('id', (await supabase.auth.getUser()).data.user?.id)
+        .single();
+
+      if (profileError || !profile?.family_group_id) {
+        console.error('Profile error:', profileError);
+        alert('ユーザー情報の取得に失敗しました');
+        return false;
+      }
+
+      const { error } = await supabase.from(TABLES.INGREDIENTS).insert({
+        family_group_id: profile.family_group_id,
         name: masterIngredient.name,
         category: masterIngredient.category,
         has_stock: true,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Ingredient add error:', error);
+        throw error;
+      }
 
       await fetchUserIngredients();
       return true;
     } catch (error) {
       console.error('Failed to add ingredient:', error);
+      alert('食材の追加に失敗しました: ' + (error as Error).message);
       return false;
     }
   };
@@ -107,14 +134,17 @@ export function useIngredients(): UseIngredientsReturn {
   const toggleStock = async (ingredientId: string, currentStock: boolean) => {
     try {
       const { error } = await supabase
-        .from('ingredients')
+        .from(TABLES.INGREDIENTS)
         .update({
           has_stock: !currentStock,
           updated_at: new Date().toISOString(),
         })
         .eq('id', ingredientId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Stock toggle error:', error);
+        throw error;
+      }
       await fetchUserIngredients();
     } catch (error) {
       console.error('Failed to toggle ingredient stock:', error);
@@ -129,11 +159,14 @@ export function useIngredients(): UseIngredientsReturn {
 
     try {
       const { error } = await supabase
-        .from('ingredients')
+        .from(TABLES.INGREDIENTS)
         .delete()
         .eq('id', ingredientId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Ingredient remove error:', error);
+        throw error;
+      }
 
       await fetchUserIngredients();
       return true;

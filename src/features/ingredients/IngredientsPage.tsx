@@ -5,8 +5,10 @@ import { useAuth } from '../../lib/AuthContext';
 import { Search, Plus, Trash2 } from 'lucide-react';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
+import Select from '../../components/common/Select';
 import Loading from '../../components/common/Loading';
 import { useIngredients } from '../../hooks/useIngredients';
+import { INGREDIENT_CATEGORIES } from '../../constants/api';
 import styles from './ingredients.module.scss';
 
 export default function IngredientsPage() {
@@ -24,17 +26,11 @@ export default function IngredientsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [showAddForm, setShowAddForm] = useState(false);
 
-  // カテゴリ一覧
-  const categories = [
-    'all',
-    '野菜',
-    '肉類',
-    '魚介類',
-    '乳製品・卵',
-    '調味料',
-    '穀物・麺類',
-    'その他',
-  ];
+  // カテゴリオプション作成
+  const categoryOptions = INGREDIENT_CATEGORIES.map((category) => ({
+    value: category,
+    label: category === 'all' ? '全てのカテゴリ' : category,
+  }));
 
   // 新しい食材を追加
   const handleAddIngredient = async (masterIngredient: any) => {
@@ -112,17 +108,11 @@ export default function IngredientsPage() {
 
       {/* フィルター */}
       <div className={styles.filters}>
-        <select
+        <Select
+          options={categoryOptions}
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
-          className={styles.categorySelect}
-        >
-          {categories.map((category) => (
-            <option key={category} value={category}>
-              {category === 'all' ? '全てのカテゴリ' : category}
-            </option>
-          ))}
-        </select>
+        />
       </div>
 
       {/* 食材一覧 */}
