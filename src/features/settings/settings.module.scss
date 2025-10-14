@@ -1,0 +1,141 @@
+// 設定画面スタイル
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 3rem;
+
+  h1 {
+    font-size: 2rem;
+    color: #1f2937;
+    margin: 0;
+  }
+}
+
+.error {
+  background-color: #fef2f2;
+  color: #dc2626;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  text-align: center;
+  border: 1px solid #fecaca;
+}
+
+// セクション
+.section {
+  margin-bottom: 2rem;
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+  color: #1f2937;
+  margin-bottom: 1rem;
+}
+
+// カード
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+}
+
+// 情報行
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid #f3f4f6;
+
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  &:first-child {
+    padding-top: 0;
+  }
+
+  .label {
+    font-weight: 500;
+    color: #6b7280;
+    font-size: 0.875rem;
+  }
+
+  .value {
+    color: #1f2937;
+    font-weight: 500;
+  }
+}
+
+// フォーム行
+.formRow {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-top: 1rem;
+
+  > div {
+    flex: 1;
+  }
+
+  button {
+    flex-shrink: 0;
+  }
+}
+
+// ログアウトボタン
+.logoutButton {
+  width: 100%;
+}
+
+// レスポンシブ対応
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .header h1 {
+    font-size: 1.5rem;
+  }
+
+  .card {
+    padding: 1rem;
+  }
+
+  .formRow {
+    flex-direction: column;
+    align-items: stretch;
+
+    button {
+      width: 100%;
+    }
+  }
+
+  .infoRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0.75rem;
+  }
+
+  .sectionTitle {
+    font-size: 1.125rem;
+  }
+}

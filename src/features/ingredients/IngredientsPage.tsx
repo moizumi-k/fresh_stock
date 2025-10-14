@@ -62,10 +62,6 @@ export default function IngredientsPage() {
     return matchesSearch && notAdded;
   });
 
-  if (!user) {
-    return <Loading text='認証確認中...' fullScreen />;
-  }
-
   if (isLoading) {
     return <Loading text='食材データを読み込み中...' />;
   }

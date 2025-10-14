@@ -23,6 +23,6 @@ export const NAVIGATION_ROUTES = [
     icon: 'Package',
     disabled: false,
   },
-  { path: ROUTES.RECIPES, label: 'レシピ', icon: 'ChefHat', disabled: true },
-  { path: ROUTES.SETTINGS, label: '設定', icon: 'Settings', disabled: true },
+  { path: ROUTES.RECIPES, label: 'レシピ', icon: 'ChefHat', disabled: false },
+  { path: ROUTES.SETTINGS, label: '設定', icon: 'Settings', disabled: false },
 ] as const;
