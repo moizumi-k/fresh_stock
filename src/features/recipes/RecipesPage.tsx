@@ -10,7 +10,6 @@ import { useRecipes } from '../../hooks/useRecipes';
 import styles from './recipes.module.scss';
 
 export default function RecipesPage() {
-  const { user } = useAuth();
   const { userIngredients, isLoading: loadingIngredients } = useIngredients();
   const { recipes, isLoading, error, generateRecipesFromIngredients } =
     useRecipes();
@@ -24,6 +23,7 @@ export default function RecipesPage() {
     if (availableIngredients.length > 0) {
       setSelectedIngredients(availableIngredients.map((ing) => ing.name));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userIngredients]);
 
   const handleGenerateRecipes = async () => {

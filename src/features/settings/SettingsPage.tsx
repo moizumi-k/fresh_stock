@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../lib/AuthContext';
 import { useRouter } from 'next/navigation';
-import { LogOut, Users, Mail, Calendar } from 'lucide-react';
+import { LogOut, Users, Mail } from 'lucide-react';
 import Button from '../../components/common/Button';
 import Select from '../../components/common/Select';
 import Loading from '../../components/common/Loading';
+import { useFamilySettings } from '../../hooks/useFamilySettings';
 import { ROUTES } from '../../constants/routes';
 import styles from './settings.module.scss';
-import { useFamilySettings } from '../../hooks/useFamilySettings';
 
 export default function SettingsPage() {
   const { user, signOut } = useAuth();
@@ -46,16 +46,12 @@ export default function SettingsPage() {
     }
   };
 
-  if (!user) {
-    return <Loading text='認証確認中...' fullScreen />;
-  }
-
   if (isLoading) {
     return <Loading text='設定を読み込み中...' />;
   }
 
   // アカウント作成日を取得
-  const createdDate = user.created_at
+  const createdDate = user?.created_at
     ? new Date(user.created_at).toLocaleDateString('ja-JP')
     : '不明';
 
@@ -76,7 +72,7 @@ export default function SettingsPage() {
         <div className={styles.card}>
           <div className={styles.infoRow}>
             <span className={styles.label}>メールアドレス</span>
-            <span className={styles.value}>{user.email}</span>
+            <span className={styles.value}>{user?.email}</span>
           </div>
           <div className={styles.infoRow}>
             <span className={styles.label}>登録日</span>

@@ -12,7 +12,7 @@ interface AppLayoutProps {
 }
 
 export default function AppLayout({ children }: AppLayoutProps) {
-  const { user, loading } = useAuth();
+  const { loading } = useAuth();
   const pathname = usePathname();
 
   // 認証不要なページ（ログイン・サインアップ）

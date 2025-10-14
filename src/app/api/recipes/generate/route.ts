@@ -166,7 +166,7 @@ ${ingredientList}
 }
 
 // レスポンスパース関数
-function parseRecipeResponse(text: string): any[] {
+function parseRecipeResponse(text: string): Recipe[] {
   try {
     let jsonText = text;
 
@@ -180,7 +180,7 @@ function parseRecipeResponse(text: string): any[] {
       }
     }
 
-    const parsed = JSON.parse(jsonText.trim());
+    const parsed = JSON.parse(jsonText.trim()) as { recipes?: Recipe[] };
 
     if (!parsed.recipes || !Array.isArray(parsed.recipes)) {
       throw new Error('レシピデータが正しい形式ではありません');
@@ -192,4 +192,14 @@ function parseRecipeResponse(text: string): any[] {
     console.error('受信したテキスト:', text.substring(0, 500));
     throw new Error('レシピの解析に失敗しました');
   }
+}
+
+// Recipe型定義を追加
+interface Recipe {
+  name: string;
+  description: string;
+  cookingTime: string;
+  difficulty: string;
+  ingredients: string[];
+  steps: string[];
 }

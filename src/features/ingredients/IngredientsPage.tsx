@@ -12,7 +12,6 @@ import { INGREDIENT_CATEGORIES } from '../../constants/api';
 import styles from './ingredients.module.scss';
 
 export default function IngredientsPage() {
-  const { user } = useAuth();
   const {
     userIngredients,
     masterIngredients,
@@ -33,7 +32,11 @@ export default function IngredientsPage() {
   }));
 
   // 新しい食材を追加
-  const handleAddIngredient = async (masterIngredient: any) => {
+  const handleAddIngredient = async (masterIngredient: {
+    id: string;
+    name: string;
+    category: string;
+  }) => {
     const success = await addIngredient(masterIngredient);
     if (success) {
       setShowAddForm(false);
