@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { generateRecipes, Recipe } from '../lib/gemini';
+import { generateRecipes, Recipe } from '../lib/recipeApi';
 
 interface UseRecipesReturn {
   recipes: Recipe[];
