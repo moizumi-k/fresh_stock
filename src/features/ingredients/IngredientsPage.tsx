@@ -1,38 +1,31 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Search, Plus, Trash2 } from 'lucide-react';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 import Select from '../../components/common/Select';
 import Loading from '../../components/common/Loading';
 import { useIngredients } from '../../hooks/useIngredients';
-import { supabase } from '../../lib/supabase';
-import { TABLES, INGREDIENT_CATEGORIES } from '../../constants/api';
+import { INGREDIENT_CATEGORIES } from '../../constants/api';
 import styles from './ingredients.module.scss';
-
-// マスター食材の型
-interface MasterIngredient {
-  id: string;
-  name: string;
-  category: string;
-}
+import {
+  IngredientMaster,
+  useIngredientMaster,
+} from '../../lib/ingredientMasterContext';
 
 export default function IngredientsPage() {
   const {
     userIngredients,
     isLoading,
     addIngredient,
-    addCustomIngredient, // 手入力用
+    addCustomIngredient,
     toggleStock,
     removeIngredient,
   } = useIngredients();
 
-  // マスター食材データ（TODO: 後でuseContextに移行）
-  const [masterIngredients, setMasterIngredients] = useState<
-    MasterIngredient[]
-  >([]);
-  const [masterLoading, setMasterLoading] = useState(true);
+  // マスター食材をContextから取得
+  const { masterIngredients, isLoading: masterLoading } = useIngredientMaster();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -41,28 +34,6 @@ export default function IngredientsPage() {
   const [customName, setCustomName] = useState('');
   const [customCategory, setCustomCategory] = useState('野菜');
 
-  // マスター食材を取得（一時的、後でContextに移行）
-  useEffect(() => {
-    const fetchMaster = async () => {
-      try {
-        const { data, error } = await supabase
-          .from(TABLES.INGREDIENT_MASTER)
-          .select('*')
-          .order('category')
-          .order('name');
-
-        if (error) throw error;
-        setMasterIngredients(data || []);
-      } catch (error) {
-        console.error('Failed to fetch master ingredients:', error);
-      } finally {
-        setMasterLoading(false);
-      }
-    };
-
-    fetchMaster();
-  }, []);
-
   // カテゴリオプション作成
   const categoryOptions = INGREDIENT_CATEGORIES.map((category) => ({
     value: category,
@@ -70,7 +41,7 @@ export default function IngredientsPage() {
   }));
 
   // 新しい食材を追加
-  const handleAddIngredient = async (masterIngredient: MasterIngredient) => {
+  const handleAddIngredient = async (masterIngredient: IngredientMaster) => {
     const success = await addIngredient(masterIngredient);
     if (success) {
       setShowAddForm(false);

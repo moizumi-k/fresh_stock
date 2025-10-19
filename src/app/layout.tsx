@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { AuthProvider } from '../lib/AuthContext';
 import AppLayout from '../components/layout/AppLayout';
 import './globals.scss';
+import { UserProvider } from '@/lib/userContext';
+import { IngredientMasterProvider } from '@/lib/ingredientMasterContext';
 
 export const metadata: Metadata = {
   title: 'FreshStock - 家族の食材管理アプリ',
@@ -17,7 +19,11 @@ export default function RootLayout({
     <html lang='ja'>
       <body>
         <AuthProvider>
-          <AppLayout>{children}</AppLayout>
+          <UserProvider>
+            <IngredientMasterProvider>
+              <AppLayout>{children}</AppLayout>
+            </IngredientMasterProvider>
+          </UserProvider>
         </AuthProvider>
       </body>
     </html>

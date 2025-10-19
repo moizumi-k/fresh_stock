@@ -2,23 +2,25 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../lib/AuthContext';
+import { useUser } from '../../lib/userContext';
 import { useRouter } from 'next/navigation';
 import { LogOut, Users, Mail } from 'lucide-react';
 import Button from '../../components/common/Button';
 import Select from '../../components/common/Select';
 import Loading from '../../components/common/Loading';
-import { useFamilySettings } from '../../hooks/useFamilySettings';
+import { supabase } from '../../lib/supabase';
+import { TABLES } from '../../constants/api';
 import { ROUTES } from '../../constants/routes';
 import styles from './settings.module.scss';
 
 export default function SettingsPage() {
   const { user, signOut } = useAuth();
+  const { familyGroup, refetch } = useUser();
   const router = useRouter();
-  const { familyGroup, isLoading, error, updateMemberCount } =
-    useFamilySettings();
 
   const [memberCount, setMemberCount] = useState<number>(2);
   const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // 家族人数の初期値を設定
   useEffect(() => {
@@ -37,16 +39,37 @@ export default function SettingsPage() {
 
   // 家族人数更新
   const handleUpdateMemberCount = async () => {
-    setIsSaving(true);
-    const success = await updateMemberCount(memberCount);
-    setIsSaving(false);
+    if (!familyGroup) {
+      setError('家族グループ情報が見つかりません');
+      return;
+    }
 
-    if (success) {
+    setIsSaving(true);
+    setError(null);
+
+    try {
+      const { error: updateError } = await supabase
+        .from(TABLES.FAMILY_GROUPS)
+        .update({ member_count: memberCount })
+        .eq('id', familyGroup.id);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      // Contextを再取得
+      await refetch();
       alert('家族人数を更新しました');
+    } catch (err) {
+      console.error('Failed to update member count:', err);
+      setError('家族人数の更新に失敗しました');
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  if (isLoading) {
+  // ローディング中
+  if (!familyGroup) {
     return <Loading text='設定を読み込み中...' />;
   }
 
@@ -88,37 +111,33 @@ export default function SettingsPage() {
           家族設定
         </h2>
         <div className={styles.card}>
-          {familyGroup && (
-            <>
-              <div className={styles.infoRow}>
-                <span className={styles.label}>家族グループID</span>
-                <span className={styles.value}>{familyGroup.group_code}</span>
-              </div>
+          <div className={styles.infoRow}>
+            <span className={styles.label}>家族グループID</span>
+            <span className={styles.value}>{familyGroup.group_code}</span>
+          </div>
 
-              <div className={styles.formRow}>
-                <Select
-                  label='家族人数'
-                  options={[
-                    { value: 1, label: '1人' },
-                    { value: 2, label: '2人' },
-                    { value: 3, label: '3人' },
-                    { value: 4, label: '4人' },
-                    { value: 5, label: '5人' },
-                  ]}
-                  value={memberCount}
-                  onChange={(e) => setMemberCount(Number(e.target.value))}
-                />
-                <Button
-                  variant='primary'
-                  onClick={handleUpdateMemberCount}
-                  isLoading={isSaving}
-                  disabled={memberCount === familyGroup.member_count}
-                >
-                  更新
-                </Button>
-              </div>
-            </>
-          )}
+          <div className={styles.formRow}>
+            <Select
+              label='家族人数'
+              options={[
+                { value: 1, label: '1人' },
+                { value: 2, label: '2人' },
+                { value: 3, label: '3人' },
+                { value: 4, label: '4人' },
+                { value: 5, label: '5人' },
+              ]}
+              value={memberCount}
+              onChange={(e) => setMemberCount(Number(e.target.value))}
+            />
+            <Button
+              variant='primary'
+              onClick={handleUpdateMemberCount}
+              isLoading={isSaving}
+              disabled={memberCount === familyGroup.member_count}
+            >
+              更新
+            </Button>
+          </div>
         </div>
       </section>
 
