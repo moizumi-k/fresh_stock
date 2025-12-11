@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { AuthProvider } from '../lib/AuthContext';
 import AppLayout from '../components/layout/AppLayout';
+import Toast from '../components/common/Toast';
 import './globals.scss';
 import { UserProvider } from '@/lib/userContext';
 import { IngredientMasterProvider } from '@/lib/ingredientMasterContext';
@@ -22,6 +23,7 @@ export default function RootLayout({
           <UserProvider>
             <IngredientMasterProvider>
               <AppLayout>{children}</AppLayout>
+              <Toast />
             </IngredientMasterProvider>
           </UserProvider>
         </AuthProvider>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { TABLES } from '../constants/api';
+import { showToast } from '../components/common/Toast';
 
 // 表示用の型
 export interface UserIngredient {
@@ -26,7 +27,7 @@ interface IngredientDbRow {
     id: string;
     name: string;
     category: string;
-  } | null; // 配列ではなく単一オブジェクト or null
+  } | null;
 }
 
 interface UseIngredientsReturn {
@@ -47,12 +48,10 @@ export function useIngredients(): UseIngredientsReturn {
   const [userIngredients, setUserIngredients] = useState<UserIngredient[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 初回データ取得
   useEffect(() => {
     fetchUserIngredients();
   }, []);
 
-  // ユーザーの食材データ取得（新構造対応）
   const fetchUserIngredients = async () => {
     try {
       const { data, error } = await supabase
@@ -76,12 +75,8 @@ export function useIngredients(): UseIngredientsReturn {
         )
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Ingredients fetch error:', error);
-        throw error;
-      }
+      if (error) throw error;
 
-      // データを整形（マスター or カスタムで表示名を切り替え）
       const formattedData: UserIngredient[] = (
         data as unknown as IngredientDbRow[]
       ).map((item) => ({
@@ -99,20 +94,18 @@ export function useIngredients(): UseIngredientsReturn {
 
       setUserIngredients(formattedData);
     } catch (error) {
-      console.error('Failed to fetch user ingredients:', error);
+      showToast.error('食材データの取得に失敗しました');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // マスターから食材追加
   const addIngredient = async (masterIngredient: {
     id: string;
     name: string;
     category: string;
   }): Promise<boolean> => {
     try {
-      // 重複チェック（master_ingredient_idベース）
       const exists = await supabase
         .from(TABLES.INGREDIENTS)
         .select('id')
@@ -121,13 +114,13 @@ export function useIngredients(): UseIngredientsReturn {
         .single();
 
       if (exists.data) {
-        alert('この食材は既に追加されています');
+        showToast.error('この食材は既に追加されています');
         return false;
       }
 
       const familyGroupId = await getFamilyGroupId();
       if (!familyGroupId) {
-        alert('家族グループ情報の取得に失敗しました');
+        showToast.error('家族グループ情報の取得に失敗しました');
         return false;
       }
 
@@ -140,40 +133,35 @@ export function useIngredients(): UseIngredientsReturn {
         has_stock: true,
       });
 
-      if (error) {
-        console.error('Ingredient add error:', error);
-        throw error;
-      }
+      if (error) throw error;
 
       await fetchUserIngredients();
+      showToast.success(`${masterIngredient.name}を追加しました`);
       return true;
     } catch (error) {
-      console.error('Failed to add ingredient:', error);
-      alert('食材の追加に失敗しました: ' + (error as Error).message);
+      showToast.error('食材の追加に失敗しました');
       return false;
     }
   };
 
-  // カスタム食材追加（手入力）
   const addCustomIngredient = async (
     name: string,
     category: string
   ): Promise<boolean> => {
     try {
-      // バリデーション
       if (!name || !category) {
-        alert('食材名とカテゴリを入力してください');
+        showToast.error('食材名とカテゴリを入力してください');
         return false;
       }
 
       if (name.length < 2) {
-        alert('食材名は2文字以上で入力してください');
+        showToast.error('食材名は2文字以上で入力してください');
         return false;
       }
 
       const familyGroupId = await getFamilyGroupId();
       if (!familyGroupId) {
-        alert('家族グループ情報の取得に失敗しました');
+        showToast.error('家族グループ情報の取得に失敗しました');
         return false;
       }
 
@@ -186,21 +174,17 @@ export function useIngredients(): UseIngredientsReturn {
         has_stock: true,
       });
 
-      if (error) {
-        console.error('Custom ingredient add error:', error);
-        throw error;
-      }
+      if (error) throw error;
 
       await fetchUserIngredients();
+      showToast.success(`${name}を追加しました`);
       return true;
     } catch (error) {
-      console.error('Failed to add custom ingredient:', error);
-      alert('食材の追加に失敗しました: ' + (error as Error).message);
+      showToast.error('食材の追加に失敗しました');
       return false;
     }
   };
 
-  // 在庫状態切り替え
   const toggleStock = async (ingredientId: string, currentStock: boolean) => {
     try {
       const { error } = await supabase
@@ -211,49 +195,37 @@ export function useIngredients(): UseIngredientsReturn {
         })
         .eq('id', ingredientId);
 
-      if (error) {
-        console.error('Stock toggle error:', error);
-        throw error;
-      }
+      if (error) throw error;
       await fetchUserIngredients();
     } catch (error) {
-      console.error('Failed to toggle ingredient stock:', error);
+      showToast.error('在庫状態の更新に失敗しました');
     }
   };
 
-  // 食材削除
   const removeIngredient = async (ingredientId: string): Promise<boolean> => {
-    if (!confirm('この食材を削除しますか？')) {
-      return false;
-    }
-
     try {
       const { error } = await supabase
         .from(TABLES.INGREDIENTS)
         .delete()
         .eq('id', ingredientId);
 
-      if (error) {
-        console.error('Ingredient remove error:', error);
-        throw error;
-      }
+      if (error) throw error;
 
       await fetchUserIngredients();
+      showToast.success('食材を削除しました');
       return true;
     } catch (error) {
-      console.error('Failed to remove ingredient:', error);
+      showToast.error('食材の削除に失敗しました');
       return false;
     }
   };
 
-  // データの再読み込み
   const refreshIngredients = async () => {
     setIsLoading(true);
     await fetchUserIngredients();
     setIsLoading(false);
   };
 
-  // ヘルパー関数: family_group_idを取得
   const getFamilyGroupId = async (): Promise<string | null> => {
     try {
       const {
@@ -269,13 +241,11 @@ export function useIngredients(): UseIngredientsReturn {
         .single();
 
       if (error || !profile?.family_group_id) {
-        console.error('Profile error:', error);
         return null;
       }
 
       return profile.family_group_id;
     } catch (error) {
-      console.error('Failed to get family group id:', error);
       return null;
     }
   };
@@ -284,7 +254,7 @@ export function useIngredients(): UseIngredientsReturn {
     userIngredients,
     isLoading,
     addIngredient,
-    addCustomIngredient, // 新規追加
+    addCustomIngredient,
     toggleStock,
     removeIngredient,
     refreshIngredients,

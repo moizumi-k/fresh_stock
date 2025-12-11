@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { showToast } from '../components/common/Toast';
 
 interface UseAuthFormReturn {
   isLoading: boolean;
@@ -35,10 +36,13 @@ export function useAuthForm(): UseAuthFormReturn {
       });
 
       if (error) throw error;
-      console.log('Login successful:', authData.user?.email);
+      showToast.success('ログインしました');
     } catch (err) {
       console.error('Login error:', err);
-      setError(err instanceof Error ? err.message : 'ログインに失敗しました');
+      const errorMessage =
+        err instanceof Error ? err.message : 'ログインに失敗しました';
+      setError(errorMessage);
+      showToast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -62,7 +66,6 @@ export function useAuthForm(): UseAuthFormReturn {
       if (authError) throw authError;
 
       if (authData.user) {
-        // 2. DB関数を呼び出してプロファイルと家族グループを一括作成
         const { data: result, error: functionError } = await supabase.rpc(
           'create_user_with_family_group',
           {
@@ -83,12 +86,14 @@ export function useAuthForm(): UseAuthFormReturn {
 
         console.log('Account created successfully:', result);
         setSuccess(true);
+        showToast.success('アカウントを作成しました');
       }
     } catch (err) {
       console.error('Signup error:', err);
-      setError(
-        err instanceof Error ? err.message : 'アカウント作成に失敗しました'
-      );
+      const errorMessage =
+        err instanceof Error ? err.message : 'アカウント作成に失敗しました';
+      setError(errorMessage);
+      showToast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

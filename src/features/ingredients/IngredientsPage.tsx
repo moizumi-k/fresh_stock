@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, Plus, Trash2 } from 'lucide-react';
+import { Search, Plus, Trash2, CheckCircle, XCircle } from 'lucide-react';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 import Select from '../../components/common/Select';
 import Loading from '../../components/common/Loading';
+import { showToast } from '../../components/common/Toast';
 import { useIngredients } from '../../hooks/useIngredients';
 import { INGREDIENT_CATEGORIES } from '../../constants/api';
 import styles from './ingredients.module.scss';
@@ -24,13 +25,12 @@ export default function IngredientsPage() {
     removeIngredient,
   } = useIngredients();
 
-  // マスター食材をContextから取得
   const { masterIngredients, isLoading: masterLoading } = useIngredientMaster();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [showAddForm, setShowAddForm] = useState(false);
-  const [showCustomForm, setShowCustomForm] = useState(false); // カスタム追加用
+  const [showCustomForm, setShowCustomForm] = useState(false);
   const [customName, setCustomName] = useState('');
   const [customCategory, setCustomCategory] = useState('野菜');
 
@@ -49,10 +49,10 @@ export default function IngredientsPage() {
     }
   };
 
-  // カスタム食材を追加（手入力）
+  // カスタム食材を追加
   const handleAddCustomIngredient = async () => {
     if (!customName.trim()) {
-      alert('食材名を入力してください');
+      showToast.error('食材名を入力してください');
       return;
     }
 
@@ -67,6 +67,24 @@ export default function IngredientsPage() {
     }
   };
 
+  // 在庫状態切り替え
+  const handleToggleStock = async (
+    ingredientId: string,
+    currentStock: boolean,
+    name: string
+  ) => {
+    await toggleStock(ingredientId, currentStock);
+    const newStatus = currentStock ? 'なし' : 'あり';
+    showToast.success(`${name}の在庫を「${newStatus}」にしました`);
+  };
+
+  // 食材削除
+  const handleRemoveIngredient = async (ingredientId: string, name: string) => {
+    if (confirm(`${name}を削除しますか？`)) {
+      await removeIngredient(ingredientId);
+    }
+  };
+
   // フィルタリングされた食材一覧
   const filteredUserIngredients = userIngredients.filter((ingredient) => {
     const matchesCategory =
@@ -77,13 +95,12 @@ export default function IngredientsPage() {
     return matchesCategory && matchesSearch;
   });
 
-  // フィルタリングされたマスター食材一覧（追加フォーム用）
+  // フィルタリングされたマスター食材一覧
   const filteredMasterIngredients = masterIngredients.filter((ingredient) => {
     const matchesSearch = ingredient.name
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
 
-    // 既に追加済みの食材は除外
     const notAdded = !userIngredients.some(
       (userIng) => !userIng.is_custom && userIng.name === ingredient.name
     );
@@ -108,6 +125,17 @@ export default function IngredientsPage() {
       {/* 食材追加フォーム */}
       {showAddForm && (
         <div className={styles.addForm}>
+          <div className={styles.addFormHeader}>
+            <h3>食材を追加</h3>
+            <Button
+              variant='secondary'
+              size='sm'
+              onClick={() => setShowAddForm(false)}
+            >
+              戻る
+            </Button>
+          </div>
+
           <Input
             placeholder='食材名で検索...'
             value={searchTerm}
@@ -117,10 +145,8 @@ export default function IngredientsPage() {
 
           <div className={styles.masterIngredientsList}>
             {filteredMasterIngredients.length === 0 ? (
-              <div style={{ padding: '1rem', textAlign: 'center' }}>
-                <p style={{ color: '#6b7280', marginBottom: '1rem' }}>
-                  該当する食材が見つかりません
-                </p>
+              <div className={styles.noResults}>
+                <p>該当する食材が見つかりません</p>
                 <Button
                   variant='secondary'
                   size='sm'
@@ -148,13 +174,7 @@ export default function IngredientsPage() {
                     <Plus size={16} />
                   </button>
                 ))}
-                <div
-                  style={{
-                    gridColumn: '1 / -1',
-                    textAlign: 'center',
-                    paddingTop: '0.5rem',
-                  }}
-                >
+                <div className={styles.customAddButton}>
                   <Button
                     variant='secondary'
                     size='sm'
@@ -175,9 +195,20 @@ export default function IngredientsPage() {
       {/* カスタム食材追加フォーム */}
       {showCustomForm && (
         <div className={styles.addForm}>
-          <h3 style={{ marginBottom: '1rem', fontSize: '1.125rem' }}>
-            手動で食材を追加
-          </h3>
+          <div className={styles.addFormHeader}>
+            <h3>手動で食材を追加</h3>
+            <Button
+              variant='secondary'
+              size='sm'
+              onClick={() => {
+                setShowCustomForm(false);
+                setCustomName('');
+                setShowAddForm(true);
+              }}
+            >
+              戻る
+            </Button>
+          </div>
 
           <Input
             label='食材名'
@@ -195,31 +226,22 @@ export default function IngredientsPage() {
             onChange={(e) => setCustomCategory(e.target.value)}
           />
 
-          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
-            <Button
-              variant='primary'
-              onClick={handleAddCustomIngredient}
-              style={{ flex: 1 }}
-            >
+          <div className={styles.formActions}>
+            <Button variant='primary' onClick={handleAddCustomIngredient}>
               追加
-            </Button>
-            <Button
-              variant='secondary'
-              onClick={() => {
-                setShowCustomForm(false);
-                setCustomName('');
-                setShowAddForm(true);
-              }}
-              style={{ flex: 1 }}
-            >
-              戻る
             </Button>
           </div>
         </div>
       )}
 
       {/* フィルター */}
-      <div className={styles.filters}>
+      <div className={styles.searchFilter}>
+        <Input
+          placeholder='食材名で検索...'
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          icon={<Search size={20} />}
+        />
         <Select
           options={categoryOptions}
           value={selectedCategory}
@@ -227,49 +249,91 @@ export default function IngredientsPage() {
         />
       </div>
 
-      {/* 食材一覧 */}
-      <div className={styles.ingredientsList}>
+      {/* 食材テーブル */}
+      <div className={styles.tableContainer}>
         {filteredUserIngredients.length === 0 ? (
           <div className={styles.emptyState}>
-            <p>まだ食材が登録されていません</p>
-            <p>「食材追加」ボタンから食材を追加してみましょう</p>
+            <h3>食材がありません</h3>
+            <p>
+              {selectedCategory === 'all'
+                ? 'まだ食材が登録されていません'
+                : `${selectedCategory}カテゴリの食材がありません`}
+            </p>
+            <Button variant='primary' onClick={() => setShowAddForm(true)}>
+              <Plus size={20} />
+              食材を追加
+            </Button>
           </div>
         ) : (
-          <div className={styles.ingredientsGrid}>
-            {filteredUserIngredients.map((ingredient) => (
-              <div
-                key={ingredient.id}
-                className={`${styles.ingredientCard} ${
-                  ingredient.has_stock ? styles.inStock : styles.outOfStock
-                }`}
-              >
-                <div className={styles.cardHeader}>
-                  <span className={styles.category}>
-                    {ingredient.category}
-                    {ingredient.is_custom && ' (カスタム)'}
-                  </span>
-                  <button
-                    onClick={() => removeIngredient(ingredient.id)}
-                    className={styles.deleteButton}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
+          <div className={styles.table}>
+            <div className={styles.tableHeader}>
+              <div className={styles.headerCell}>食材名</div>
+              <div className={styles.headerCell}>カテゴリ</div>
+              <div className={styles.headerCell}>在庫状況</div>
+              <div className={styles.headerCell}>操作</div>
+            </div>
 
-                <div className={styles.cardBody}>
-                  <h3 className={styles.name}>{ingredient.name}</h3>
-                  <Button
-                    variant={ingredient.has_stock ? 'primary' : 'secondary'}
-                    onClick={() =>
-                      toggleStock(ingredient.id, ingredient.has_stock)
-                    }
-                    size='sm'
-                  >
-                    {ingredient.has_stock ? '✅ あり' : '❌ なし'}
-                  </Button>
+            <div className={styles.tableBody}>
+              {filteredUserIngredients.map((ingredient) => (
+                <div key={ingredient.id} className={styles.tableRow}>
+                  <div className={styles.cell}>
+                    <span className={styles.ingredientName}>
+                      {ingredient.name}
+                    </span>
+                    {ingredient.is_custom && (
+                      <span className={styles.customBadge}>カスタム</span>
+                    )}
+                  </div>
+
+                  <div className={styles.cell}>
+                    <span className={styles.category}>
+                      {ingredient.category}
+                    </span>
+                  </div>
+
+                  <div className={styles.cell}>
+                    <button
+                      onClick={() =>
+                        handleToggleStock(
+                          ingredient.id,
+                          ingredient.has_stock,
+                          ingredient.name
+                        )
+                      }
+                      className={`${styles.stockButton} ${
+                        ingredient.has_stock
+                          ? styles.inStock
+                          : styles.outOfStock
+                      }`}
+                    >
+                      {ingredient.has_stock ? (
+                        <>
+                          <CheckCircle size={16} />
+                          <span>あり</span>
+                        </>
+                      ) : (
+                        <>
+                          <XCircle size={16} />
+                          <span>なし</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  <div className={styles.cell}>
+                    <Button
+                      variant='danger'
+                      size='sm'
+                      onClick={() =>
+                        handleRemoveIngredient(ingredient.id, ingredient.name)
+                      }
+                    >
+                      <Trash2 size={16} />
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
       </div>
